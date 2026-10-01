@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1419" />
+  <meta name="description" content="Timeline — guess the year. A daily shareable history game." />
+  <title>Timeline</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <h1>Timeline</h1>
+        <p class="tagline">Guess the year. Same puzzle for everyone.</p>
+      </div>
+      <div class="header-meta">
+        <span id="date-label" class="pill"></span>
+        <span id="streak-label" class="pill streak" title="Current streak"></span>
+      </div>
+    </header>
+
+    <main id="main" class="main">
+      <!-- Play / result / end screens injected by app.js -->
+    </main>
+
+    <footer class="footer">
+      <p>Daily puzzle · America/Chicago · <a href="README.md">Rules</a></p>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
