@@ -104,6 +104,90 @@ function scoreGuess(guess, truth) {
   return { points, delta, emoji, guess, truth };
 }
 
+const GREEN_EMOJI = "🟢";
+const PERFECT_DAY_SCORE = MAX_POINTS_PER_ROUND * ROUNDS;
+
+/**
+ * Short canvas particle burst. Visual-only — does not touch scoring, share, or seed.
+ * @param {{ big?: boolean }} [opts]
+ */
+function burstConfetti(opts = {}) {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const big = !!opts.big;
+  const canvas = document.createElement("canvas");
+  canvas.className = "confetti-layer";
+  canvas.setAttribute("aria-hidden", "true");
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    canvas.remove();
+    return;
+  }
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const fit = () => {
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  fit();
+
+  const count = big ? 90 : 42;
+  const colors = ["#3dd68c", "#f5c542", "#5b9dff", "#ffffff", "#7bb0ff", "#ff8ec8"];
+  const originX = window.innerWidth / 2;
+  const originY = window.innerHeight * (big ? 0.32 : 0.36);
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    const angle = -Math.PI + Math.random() * Math.PI;
+    const speed = (big ? 7 : 5) + Math.random() * (big ? 10 : 7);
+    particles.push({
+      x: originX,
+      y: originY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - (big ? 5 : 3.5),
+      w: 4 + Math.random() * 5,
+      h: 3 + Math.random() * 4,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.45,
+      color: colors[i % colors.length],
+    });
+  }
+
+  const started = performance.now();
+  const duration = big ? 1700 : 1150;
+
+  function frame(now) {
+    const elapsed = now - started;
+    const life = Math.max(0, 1 - elapsed / duration);
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    for (const p of particles) {
+      p.vy += 0.2;
+      p.vx *= 0.992;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (elapsed < duration) {
+      requestAnimationFrame(frame);
+    } else {
+      canvas.remove();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
 // ——— Persistence ——————————————————————————————————————————————————
 
 function loadStorage() {
@@ -290,6 +374,10 @@ function renderReveal(result) {
       renderPlay();
     }
   });
+
+  if (result.emoji === GREEN_EMOJI) {
+    requestAnimationFrame(() => burstConfetti());
+  }
 }
 
 function finishGame() {
@@ -298,6 +386,9 @@ function finishGame() {
   const streak = updateStreakOnFinish(store, state.dateKey, state.total);
   streakLabel.textContent = `🔥 ${streak}`;
   renderEnd(streak);
+  if (state.total === PERFECT_DAY_SCORE) {
+    requestAnimationFrame(() => burstConfetti({ big: true }));
+  }
 }
 
 function renderEnd(streak) {
