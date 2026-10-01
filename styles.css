@@ -91,11 +91,37 @@ body {
 }
 
 .card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem;
   box-shadow: var(--shadow);
+}
+
+.era-wash {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--era-tint, transparent);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card.era-live .era-wash {
+  animation: eraWash 1.35s ease forwards;
+}
+
+.card.era-static .era-wash {
+  opacity: 0.08;
+}
+
+.round-bar,
+.reveal,
+.end-screen > * {
+  position: relative;
+  z-index: 1;
 }
 
 .round-bar {
@@ -235,9 +261,46 @@ body {
   padding: 0.5rem 0 0.25rem;
 }
 
+.reveal-beat {
+  position: relative;
+  min-height: 3.1rem;
+  margin-bottom: 0.15rem;
+}
+
 .reveal-emoji {
   font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.reveal-emoji.is-hidden {
+  visibility: hidden;
+}
+
+.near-miss {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--yellow);
+  animation: nearMissPulse 0.42s ease;
+}
+
+.near-miss[hidden] {
+  display: none;
+}
+
+.era-label {
+  margin: 0 0 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--era-ink, var(--muted));
+  opacity: 0.85;
 }
 
 .reveal-year {
@@ -469,6 +532,13 @@ body {
   .gap-fly-bar {
     transform: scaleX(1) !important;
   }
+  .era-wash,
+  .near-miss,
+  .mini-gap,
+  .share-emoji,
+  .toast {
+    animation: none !important;
+  }
 }
 
 .end-screen {
@@ -497,8 +567,81 @@ body {
 .emojis {
   font-size: 1.75rem;
   letter-spacing: 0.15em;
-  margin: 0.75rem 0 1rem;
+  margin: 0.55rem 0 0.65rem;
 }
+
+.share-kinetic {
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.share-emoji {
+  display: inline-block;
+}
+
+.end-animate .share-emoji,
+.share-kinetic.kinetic-play .share-emoji {
+  animation: emojiFill 0.38s ease both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+.recap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  margin: 0 0 0.65rem;
+}
+
+.mini-gap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.end-animate .mini-gap {
+  animation: recapIn 0.32s ease both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+.mini-emoji {
+  width: 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.mini-track {
+  position: relative;
+  flex: 1;
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 999px;
+}
+
+.mini-bar {
+  position: absolute;
+  top: 2px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--gap-color, var(--green));
+}
+
+.mini-gap.tier-green { --gap-color: var(--green); }
+.mini-gap.tier-yellow { --gap-color: var(--yellow); }
+.mini-gap.tier-red { --gap-color: var(--red); }
+
+.mini-pin {
+  position: absolute;
+  top: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #fff;
+}
+
+.mini-pin.guess { background: var(--accent); }
+.mini-pin.answer { background: var(--gap-color, var(--green)); }
 
 .share-preview {
   background: var(--bg);
@@ -602,6 +745,28 @@ body {
 @keyframes fadeUp {
   from { opacity: 0; transform: translateX(-50%) translateY(8px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes eraWash {
+  0% { opacity: 0; }
+  22% { opacity: 0.24; }
+  100% { opacity: 0.07; }
+}
+
+@keyframes nearMissPulse {
+  0% { opacity: 0; transform: scale(0.86); }
+  45% { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes recapIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes emojiFill {
+  from { opacity: 0.15; transform: scale(0.65); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .error-box {
