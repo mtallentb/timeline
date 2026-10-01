@@ -4,6 +4,9 @@ A daily shareable year-guessing game. Same 5 events for everyone on a given cale
 
 ## Play online
 
+https://timeline-production-5838.up.railway.app/
+
+Intended GitHub Pages URL (enable in repo Settings \u2192 Pages \u2192 Deploy from branch `main`, folder `/`):
 https://mtallentb.github.io/timeline/
 
 ## Play locally

@@ -8,7 +8,7 @@ const YEAR_MAX = 2026;
 const MAX_YEARS = YEAR_MAX - YEAR_MIN; // 126
 const ROUNDS = 5;
 const MAX_POINTS_PER_ROUND = 200;
-const SITE_URL = "https://mtallentb.github.io/timeline/";
+const SITE_URL = "https://timeline-production-5838.up.railway.app/";
 const STORAGE_KEY = "timeline_v1";
 
 const main = document.getElementById("main");
