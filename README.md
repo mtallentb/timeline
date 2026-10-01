@@ -2,6 +2,10 @@
 
 A daily shareable year-guessing game. Same 5 events for everyone on a given calendar day (America/Chicago).
 
+## Play online
+
+https://mtallentb.github.io/timeline/
+
 ## Play locally
 
 ```bash
@@ -56,7 +60,7 @@ where `126 = 2026 − 1900` (slider range). Perfect guess on all 5 rounds = **10
 ```
 Timeline MM/DD  🟢🟢🟡🔴🟢  740/1000
 🔥 Streak: 3
-https://timeline.game
+https://mtallentb.github.io/timeline/
 ```
 
 One-tap **Copy share card** copies that text to the clipboard.
