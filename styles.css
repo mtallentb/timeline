@@ -241,9 +241,38 @@ body {
 }
 
 .reveal-year {
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.35rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+
+.reveal-clue {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.reveal-slider-wrap {
+  margin: 0.15rem 0 0.35rem;
+}
+
+.reveal-slider-wrap input[type="range"] {
+  pointer-events: none;
+  cursor: default;
+}
+
+.reveal-slider-wrap input[type="range"].snapped::-webkit-slider-thumb {
+  background: var(--text);
+  box-shadow: 0 2px 8px rgba(232, 238, 246, 0.25);
+}
+
+.reveal-slider-wrap input[type="range"].snapped::-moz-range-thumb {
+  background: var(--text);
 }
 
 .reveal-delta {
@@ -255,8 +284,187 @@ body {
 .reveal-points {
   font-size: 1.1rem;
   font-weight: 600;
-  margin: 0 0 1.25rem;
+  margin: 0.15rem 0 1.15rem;
   color: var(--green);
+}
+
+.gap-fly {
+  --gap-color: var(--green);
+  margin: 0.35rem 0 0.85rem;
+}
+
+.gap-fly.tier-yellow { --gap-color: var(--yellow); }
+.gap-fly.tier-red { --gap-color: var(--red); }
+
+.gap-fly-ruler {
+  position: relative;
+  height: 118px;
+  margin: 0 0.15rem;
+}
+
+.gap-fly-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50px;
+  height: 18px;
+  background: linear-gradient(90deg, rgba(91, 157, 255, 0.1), rgba(61, 214, 140, 0.08) 55%, rgba(245, 197, 66, 0.08));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.gap-fly-ticks {
+  position: absolute;
+  inset: 48px 0 0;
+  pointer-events: none;
+}
+
+.gap-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gap-tick i {
+  display: block;
+  width: 1px;
+  height: 18px;
+  background: rgba(139, 155, 176, 0.45);
+}
+
+.gap-tick em {
+  font-style: normal;
+  margin-top: 3px;
+}
+
+.gap-fly-bar {
+  position: absolute;
+  top: 55px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--gap-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--gap-color) 45%, transparent);
+  will-change: transform;
+}
+
+.gap-fly-pin {
+  position: absolute;
+  width: 0;
+  z-index: 2;
+}
+
+.gap-fly-pin.guess {
+  top: 2px;
+}
+
+.gap-fly-pin.answer {
+  top: 54px;
+}
+
+.gap-fly-pin .pin-head {
+  position: absolute;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  transform: translateX(-50%);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.gap-fly-pin.guess .pin-head {
+  top: 52px;
+  background: var(--accent);
+}
+
+.gap-fly-pin.answer .pin-head {
+  top: 0;
+  background: var(--gap-color);
+}
+
+.gap-fly-pin .pin-meta {
+  position: absolute;
+  left: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  line-height: 1.15;
+}
+
+.gap-fly-pin.guess .pin-meta {
+  top: 0;
+}
+
+.gap-fly-pin.answer .pin-meta {
+  top: 18px;
+}
+
+.gap-fly-pin.edge-left .pin-meta {
+  transform: none;
+}
+
+.gap-fly-pin.edge-right .pin-meta {
+  transform: translateX(-100%);
+}
+
+.pin-label {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pin-year {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.gap-fly-pin.guess .pin-year { color: var(--accent); }
+.gap-fly-pin.answer .pin-year { color: var(--text); }
+
+.gap-fly-pin.same-year .pin-head {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gap-color) 35%, transparent);
+}
+
+.gap-fly-delta {
+  margin: 0.15rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--gap-color);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 380px) {
+  .reveal-year { font-size: 2rem; }
+  .gap-fly-ruler { height: 112px; }
+  .pin-label { font-size: 0.62rem; }
+  .gap-fly-delta { font-size: 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gap-fly-bar {
+    transform: scaleX(1) !important;
+  }
 }
 
 .end-screen {

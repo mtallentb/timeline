@@ -336,8 +336,158 @@ function renderPlay() {
   });
 }
 
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+
+function tierFromEmoji(emoji) {
+  if (emoji === "🟢") return "green";
+  if (emoji === "🟡") return "yellow";
+  return "red";
+}
+
+/** Local year window around guess/answer so pins sit inward, not on the rail edge. */
+function rulerBounds(guess, truth) {
+  const lo = Math.min(guess, truth);
+  const hi = Math.max(guess, truth);
+  const gap = hi - lo;
+  const pad = Math.max(8, Math.round(gap * 0.28) + 4);
+  const nice = gap + pad * 2 > 40 ? 10 : 5;
+  let start = Math.floor((lo - pad) / nice) * nice;
+  let end = Math.ceil((hi + pad) / nice) * nice;
+  if (end <= start) end = start + nice;
+  return { start, end };
+}
+
+function yearToPercent(year, start, end) {
+  if (end === start) return 50;
+  return ((year - start) / (end - start)) * 100;
+}
+
+function rulerTickStep(start, end) {
+  const span = end - start;
+  if (span <= 12) return 2;
+  if (span <= 24) return 5;
+  if (span <= 50) return 10;
+  if (span <= 90) return 20;
+  return 25;
+}
+
+function buildRulerTicks(start, end) {
+  const step = rulerTickStep(start, end);
+  let t = Math.ceil(start / step) * step;
+  const ticks = [];
+  for (; t <= end; t += step) {
+    const pct = yearToPercent(t, start, end);
+    ticks.push(
+      `<span class="gap-tick" style="left:${pct}%"><i></i><em>${t}</em></span>`
+    );
+  }
+  return ticks.join("");
+}
+
+function pinEdgeClass(pct) {
+  if (pct < 16) return "edge-left";
+  if (pct > 84) return "edge-right";
+  return "";
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeOutBack(t) {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+let revealAnimId = 0;
+
+function settleRevealTheater(result, els) {
+  const { slider, yearEl, gapBar, deltaEl } = els;
+  slider.value = String(result.truth);
+  slider.classList.add("snapped");
+  yearEl.textContent = result.truth;
+  gapBar.style.transform = "scaleX(1)";
+  if (result.delta === 0) {
+    deltaEl.textContent = "Perfect!";
+  } else if (result.delta === 1) {
+    deltaEl.textContent = "Δ 1 year";
+  } else {
+    deltaEl.textContent = `Δ ${result.delta} years`;
+  }
+}
+
+function playRevealTheater(result, els) {
+  const token = ++revealAnimId;
+  const { slider, yearEl, gapBar, deltaEl } = els;
+  if (!slider || !yearEl || !gapBar || !deltaEl) return;
+  const reduced = prefersReducedMotion();
+  const snapMs = 900;
+  const gapMs = 1050;
+  const gapDelay = 70;
+
+  if (reduced) {
+    settleRevealTheater(result, els);
+    return;
+  }
+
+  const snapFrom =
+    result.guess === result.truth
+      ? Math.max(YEAR_MIN, result.truth - 4)
+      : result.guess;
+  const snapStart = performance.now();
+
+  function snapFrame(now) {
+    if (token !== revealAnimId) return;
+    const t = Math.min(1, (now - snapStart) / snapMs);
+    const raw = snapFrom + (result.truth - snapFrom) * easeOutBack(t);
+    const year = Math.round(Math.min(YEAR_MAX, Math.max(YEAR_MIN, raw)));
+    slider.value = String(year);
+    yearEl.textContent = year;
+    if (t < 1) requestAnimationFrame(snapFrame);
+    else {
+      slider.value = String(result.truth);
+      yearEl.textContent = result.truth;
+      slider.classList.add("snapped");
+    }
+  }
+
+  const gapStartAt = snapStart + gapDelay;
+  function gapFrame(now) {
+    if (token !== revealAnimId) return;
+    if (now < gapStartAt) {
+      requestAnimationFrame(gapFrame);
+      return;
+    }
+    const t = Math.min(1, (now - gapStartAt) / gapMs);
+    const e = easeOutCubic(t);
+    gapBar.style.transform = `scaleX(${e})`;
+    if (result.delta === 0) {
+      deltaEl.textContent = "Perfect!";
+    } else {
+      const n = Math.round(result.delta * e);
+      deltaEl.textContent = n === 1 ? "Δ 1 year" : `Δ ${n} years`;
+    }
+    if (t < 1) requestAnimationFrame(gapFrame);
+  }
+
+  requestAnimationFrame(snapFrame);
+  requestAnimationFrame(gapFrame);
+}
+
 function renderReveal(result) {
   state.revealing = true;
+  const ev = state.puzzle[state.round];
+  const tier = tierFromEmoji(result.emoji);
+  const bounds = rulerBounds(result.guess, result.truth);
+  const guessPct = yearToPercent(result.guess, bounds.start, bounds.end);
+  const truthPct = yearToPercent(result.truth, bounds.start, bounds.end);
+  const leftPct = Math.min(guessPct, truthPct);
+  const widthPct = Math.abs(guessPct - truthPct);
+  const growFromGuess = result.guess <= result.truth;
+  const sameYear = result.delta === 0;
   const deltaLabel =
     result.delta === 0
       ? "Perfect!"
@@ -354,8 +504,35 @@ function renderReveal(result) {
       </div>
       <div class="reveal">
         <div class="reveal-emoji">${result.emoji}</div>
-        <p class="reveal-year">${result.truth}</p>
-        <p class="reveal-delta">You guessed ${result.guess} · ${deltaLabel}</p>
+        <p class="reveal-year" id="reveal-year">${result.guess}</p>
+        <p class="reveal-clue">${escapeHtml(ev.clue)}</p>
+        <p class="sr-only">${escapeHtml(`You guessed ${result.guess}. Answer ${result.truth}. ${deltaLabel}.`)}</p>
+        <div class="slider-wrap reveal-slider-wrap">
+          <input type="range" id="reveal-slider" min="${YEAR_MIN}" max="${YEAR_MAX}" value="${result.guess}" step="1" disabled aria-label="Answer year" />
+          <div class="slider-labels"><span>${YEAR_MIN}</span><span>${YEAR_MAX}</span></div>
+        </div>
+        <div class="gap-fly tier-${tier}" id="gap-fly">
+          <div class="gap-fly-ruler">
+            <div class="gap-fly-strip"></div>
+            <div class="gap-fly-ticks">${buildRulerTicks(bounds.start, bounds.end)}</div>
+            <div class="gap-fly-bar" id="gap-bar" style="left:${leftPct}%;width:${Math.max(widthPct, 0)}%;transform-origin:${growFromGuess ? "left" : "right"} center;transform:scaleX(0)"></div>
+            <div class="gap-fly-pin guess ${pinEdgeClass(guessPct)}" style="left:${guessPct}%" id="pin-guess">
+              <div class="pin-meta">
+                <span class="pin-label">Your guess</span>
+                <span class="pin-year">${result.guess}</span>
+              </div>
+              <span class="pin-head"></span>
+            </div>
+            <div class="gap-fly-pin answer ${pinEdgeClass(truthPct)}${sameYear ? " same-year" : ""}" style="left:${truthPct}%" id="pin-answer">
+              <span class="pin-head"></span>
+              <div class="pin-meta">
+                <span class="pin-label">Answer</span>
+                <span class="pin-year">${result.truth}</span>
+              </div>
+            </div>
+          </div>
+          <p class="gap-fly-delta" id="gap-delta">Δ 0 years</p>
+        </div>
         <p class="reveal-points">+${result.points} points</p>
         <button class="btn btn-primary" id="btn-next">
           ${state.round + 1 >= ROUNDS ? "See results" : "Next round"}
@@ -365,6 +542,7 @@ function renderReveal(result) {
   `;
 
   document.getElementById("btn-next").addEventListener("click", () => {
+    revealAnimId += 1;
     state.revealing = false;
     state.round += 1;
     state.currentGuess = 1980;
@@ -373,6 +551,13 @@ function renderReveal(result) {
     } else {
       renderPlay();
     }
+  });
+
+  playRevealTheater(result, {
+    slider: document.getElementById("reveal-slider"),
+    yearEl: document.getElementById("reveal-year"),
+    gapBar: document.getElementById("gap-bar"),
+    deltaEl: document.getElementById("gap-delta"),
   });
 
   if (result.emoji === GREEN_EMOJI) {
