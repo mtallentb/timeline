@@ -298,7 +298,7 @@ body {
 
 .gap-fly-ruler {
   position: relative;
-  height: 118px;
+  height: 138px;
   margin: 0 0.15rem;
 }
 
@@ -306,7 +306,7 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  top: 50px;
+  top: 48px;
   height: 18px;
   background: linear-gradient(90deg, rgba(91, 157, 255, 0.1), rgba(61, 214, 140, 0.08) 55%, rgba(245, 197, 66, 0.08));
   border: 1px solid var(--border);
@@ -315,16 +315,16 @@ body {
 
 .gap-fly-ticks {
   position: absolute;
-  inset: 48px 0 0;
+  left: 0;
+  right: 0;
+  top: 48px;
+  height: 18px;
   pointer-events: none;
 }
 
 .gap-tick {
   position: absolute;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   color: var(--muted);
   font-size: 0.65rem;
   font-variant-numeric: tabular-nums;
@@ -338,8 +338,12 @@ body {
 }
 
 .gap-tick em {
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  transform: translateX(-50%);
   font-style: normal;
-  margin-top: 3px;
+  font-weight: 500;
 }
 
 .gap-fly-bar {
@@ -456,7 +460,7 @@ body {
 
 @media (max-width: 380px) {
   .reveal-year { font-size: 2rem; }
-  .gap-fly-ruler { height: 112px; }
+  .gap-fly-ruler { height: 132px; }
   .pin-label { font-size: 0.62rem; }
   .gap-fly-delta { font-size: 1.2rem; }
 }

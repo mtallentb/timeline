@@ -373,14 +373,16 @@ function rulerTickStep(start, end) {
   return 25;
 }
 
-function buildRulerTicks(start, end) {
+function buildRulerTicks(start, end, pinYears = []) {
   const step = rulerTickStep(start, end);
   let t = Math.ceil(start / step) * step;
+  const pinPcts = pinYears.map((y) => yearToPercent(y, start, end));
   const ticks = [];
   for (; t <= end; t += step) {
     const pct = yearToPercent(t, start, end);
+    const crowded = pinPcts.some((p) => Math.abs(p - pct) < 11);
     ticks.push(
-      `<span class="gap-tick" style="left:${pct}%"><i></i><em>${t}</em></span>`
+      `<span class="gap-tick${crowded ? " no-label" : ""}" style="left:${pct}%"><i></i>${crowded ? "" : `<em>${t}</em>`}</span>`
     );
   }
   return ticks.join("");
@@ -514,7 +516,7 @@ function renderReveal(result) {
         <div class="gap-fly tier-${tier}" id="gap-fly">
           <div class="gap-fly-ruler">
             <div class="gap-fly-strip"></div>
-            <div class="gap-fly-ticks">${buildRulerTicks(bounds.start, bounds.end)}</div>
+            <div class="gap-fly-ticks">${buildRulerTicks(bounds.start, bounds.end, [result.guess, result.truth])}</div>
             <div class="gap-fly-bar" id="gap-bar" style="left:${leftPct}%;width:${Math.max(widthPct, 0)}%;transform-origin:${growFromGuess ? "left" : "right"} center;transform:scaleX(0)"></div>
             <div class="gap-fly-pin guess ${pinEdgeClass(guessPct)}" style="left:${guessPct}%" id="pin-guess">
               <div class="pin-meta">
